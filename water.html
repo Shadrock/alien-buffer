@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Alien Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css' rel='stylesheet'/>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    #instructions {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #fff;
+      padding: 5px 20px 5px 20px;
+      border-radius: 10px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <div id="instructions">
+    <h2>🚰 Instructions</h2>
+    <p>Click anywhere to check for water sites.<br>
+    Go to the <a href = "https://shadrock.github.io/alien-buffer/">alien finder page </a> to try buffering there.</p>
+  </div>
+  <script>
+       // Data showing potential alien landing sites
+      var url = 'https://raw.githubusercontent.com/Shadrock/online-webmap-course/master/studio-week5/camp-water-analysis/data/Zaatari_refugee_camp_water_simplified.geojson';
+
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2hhZHJvY2siLCJhIjoidGdncWhxNCJ9.nvqdA0ac5B3z4ILLtrkU0g';
+
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+      center: [36.3295, 32.2963], // starting position at Zaatari Camp
+      zoom: 14 // starting zoom
+    });
+
+    map.on('load', function () {
+      // Added the source for external geojson - necessary?
+      map.addSource('water', { type: 'geojson', data: url });
+      //Map layers go in here!
+      map.addLayer({
+        id: 'water',
+        source: {
+          type: 'geojson',
+          data: url
+        },
+        type: 'circle',
+        paint: {
+          'circle-color': '#5555f6',
+          'circle-radius': 8,
+          'circle-opacity': .5
+        }
+      });
+
+    });
+
+    //Click event goes here!
+
+    //makeRadius function goes here!
+
+    //spatialJoin function goes here!
+
+
+  </script>
+
+</body>
+
+</html>
