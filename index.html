@@ -122,7 +122,6 @@
           'fill-opacity': 0.1
         }
       });
-
     });
 
     //Click event goes here!
@@ -131,7 +130,7 @@
      // console.log(eventLngLat)
      var featuresInBuffer = spatialJoin(aliens, searchRadius);
      map.getSource('alien-truth').setData(turf.featureCollection(featuresInBuffer));
-   });
+    });
 
     //makeRadius function goes here!
     function makeRadius(lngLatArray, radiusInMeters) {
