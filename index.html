@@ -128,8 +128,10 @@
     map.on('click', function(e) {
      var eventLngLat = [e.lngLat.lng, e.lngLat.lat];
      // console.log(eventLngLat)
+     var searchRadius = makeRadius(eventLngLat, 15000);
+     map.getSource('search-radius').setData(searchRadius);
      var featuresInBuffer = spatialJoin(aliens, searchRadius);
-     map.getSource('alien-truth').setData(turf.featureCollection(featuresInBuffer));
+        map.getSource('alien-truth').setData(turf.featureCollection(featuresInBuffer));
     });
 
     //makeRadius function goes here!
@@ -138,19 +140,19 @@
         var buffered = turf.buffer(point, radiusInMeters, { units: 'meters' });
         return buffered;
       }
-    var searchRadius = makeRadius(eventLngLat, 15000);
-    map.getSource('search-radius').setData(searchRadius);
+
 
     //spatialJoin function goes here!
     function spatialJoin(sourceGeoJSON, filterFeature) {
-      // Loop through all the features in the source geojson and return the ones that
-      // are inside the filter feature (buffered radius) and are confirmed landing sites
-      var joined = sourceGeoJSON.features.filter(function (feature) {
-        return turf.booleanPointInPolygon(feature, filterFeature) && feature.properties.isAlien === 'yes';
-      });
+  // Loop through all the features in the source geojson and return the ones that
+  // are inside the filter feature (buffered radius) and are confirmed landing sites
+  var joined = sourceGeoJSON.features.filter(function (feature) {
+    return turf.booleanPointInPolygon(feature, filterFeature) && feature.properties.isAlien === 'yes';
+  });
 
-      return joined;
-    }
+  return joined;
+}
+
 
 
 
