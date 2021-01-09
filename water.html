@@ -41,16 +41,16 @@
     Go to the <a href = "https://shadrock.github.io/alien-buffer/">alien finder page </a> to try buffering there.</p>
   </div>
   <script>
-       // Data showing potential alien landing sites
-      var url = 'https://raw.githubusercontent.com/Shadrock/online-webmap-course/master/studio-week5/camp-water-analysis/data/Zaatari_refugee_camp_water_simplified.geojson';
+    // Data showing water sites
+    var url = 'https://raw.githubusercontent.com/Shadrock/online-webmap-course/master/studio-week5/camp-water-analysis/data/Zaatari_refugee_camp_water_simplified.geojson';
 
     mapboxgl.accessToken = 'pk.eyJ1Ijoic2hhZHJvY2siLCJhIjoidGdncWhxNCJ9.nvqdA0ac5B3z4ILLtrkU0g';
 
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+      style: 'mapbox://styles/mapbox/satellite-v9', // stylesheet location
       center: [36.3295, 32.2963], // starting position at Zaatari Camp
-      zoom: 14 // starting zoom
+      zoom: 14, // starting zoom
     });
 
     map.on('load', function () {
@@ -58,16 +58,20 @@
       map.addSource('water', { type: 'geojson', data: url });
       //Map layers go in here!
       map.addLayer({
-        id: 'water',
+        id: 'change-name',
         source: {
           type: 'geojson',
           data: url
         },
         type: 'circle',
         paint: {
-          'circle-color': '#5555f6',
-          'circle-radius': 8,
-          'circle-opacity': .5
+          'circle-color': '#83e8fc',
+          'circle-radius': 3,
+          'circle-opacity': 1,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#0557fa',
+
+
         }
       });
 
