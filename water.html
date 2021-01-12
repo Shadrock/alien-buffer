@@ -28,6 +28,7 @@
       background-color: #fff;
       padding: 5px 20px 5px 20px;
       border-radius: 10px;
+      font-family: Lato, sans-serif;
     }
 
   </style>
@@ -48,17 +49,16 @@
 
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/satellite-v9', // stylesheet location
+      style: 'mapbox://styles/mapbox/satellite-v9', // imagery basemap
       center: [36.3295, 32.2963], // starting position at Zaatari Camp
       zoom: 14, // starting zoom
     });
 
     map.on('load', function () {
-      // Added the source for external geojson - necessary?
-      map.addSource('water', { type: 'geojson', data: url });
+
       //Map layers go in here!
       map.addLayer({
-        id: 'change-name',
+        id: 'OSM-water',
         source: {
           type: 'geojson',
           data: url
@@ -70,19 +70,67 @@
           'circle-opacity': 1,
           'circle-stroke-width': 1,
           'circle-stroke-color': '#0557fa',
-
-
         }
       });
 
+      // When the map has finished loading, add a new layer that will be empty
+      // at first, but will eventually house our confirmed water sites.
+      map.addLayer({
+        id: 'selected-water',
+        source: {
+          type: 'geojson',
+          data: { "type": "FeatureCollection", "features": [] }
+        },
+        type: 'symbol',
+        layout: {
+           'icon-image': 'water-15',
+           'icon-size': 1,
+           'icon-allow-overlap': true
+         }
+      });
+
+      // Draw the alien search radius on the map
+      map.addLayer({
+        id: 'search-radius',
+        source: {
+          type: 'geojson',
+          data: { "type": "FeatureCollection", "features": [] }
+        },
+        type: 'fill',
+        paint: {
+          'fill-color': '#fcf683',
+          'fill-opacity': 0.5
+        }
+      });
     });
 
     //Click event goes here!
+    map.on('click', function(e) {
+      var eventLngLat = [e.lngLat.lng, e.lngLat.lat];
+      //console.log(eventLngLat)
+      var searchRadius = makeRadius(eventLngLat, 500);
+      map.getSource('search-radius').setData(searchRadius);
+      var featuresInBuffer = spatialJoin(url, searchRadius);
+      map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer));
+    });
 
     //makeRadius function goes here!
+    function makeRadius(lngLatArray, radiusInMeters) {
+      var point = turf.point(lngLatArray);
+      var buffered = turf.buffer(point, radiusInMeters, { units: 'meters' });
+      return buffered;
+    }
 
     //spatialJoin function goes here!
+    function spatialJoin(sourceGeoJSON, filterFeature) {
+        // Loop through all the features in the source geojson and return the ones that
+        // are inside the filter feature (buffered radius) and are confirmed landing sites
+        var joined = sourceGeoJSON.features.filter(function (feature) {
+          return turf.booleanPointInPolygon(feature, filterFeature) && feature.properties.type === 'Free_standing';
+        });
 
+        return joined;
+      }
 
   </script>
 
