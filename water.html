@@ -75,6 +75,7 @@
 
       // When the map has finished loading, add a new layer that will be empty
       // at first, but will eventually house our confirmed water sites.
+
       map.addLayer({
         id: 'selected-water',
         source: {
@@ -110,7 +111,7 @@
       //console.log(eventLngLat)
       var searchRadius = makeRadius(eventLngLat, 500);
       map.getSource('search-radius').setData(searchRadius);
-      var featuresInBuffer = spatialJoin(url, searchRadius);
+      var featuresInBuffer = spatialJoin(url, searchRadius); // references url var that contains link to geojson
       map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer));
     });
 
