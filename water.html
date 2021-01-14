@@ -44,7 +44,6 @@
   <script>
     // Data showing water sites
     var url = 'https://raw.githubusercontent.com/Shadrock/online-webmap-course/master/studio-week5/camp-water-analysis/data/Zaatari_refugee_camp_water_simplified.geojson';
-
     mapboxgl.accessToken = 'pk.eyJ1Ijoic2hhZHJvY2siLCJhIjoidGdncWhxNCJ9.nvqdA0ac5B3z4ILLtrkU0g';
 
     var map = new mapboxgl.Map({
@@ -55,6 +54,7 @@
     });
 
     map.on('load', function () {
+      // tried adding map.addSource here and it broke both data & buffer.
 
       //Map layers go in here!
       map.addLayer({
@@ -90,7 +90,7 @@
          }
       });
 
-      // Draw the alien search radius on the map
+      // Draw the search radius on the map
       map.addLayer({
         id: 'search-radius',
         source: {
@@ -107,12 +107,13 @@
 
     //Click event goes here!
     map.on('click', function(e) {
+      // tried adding map.addSource here and it broke the buffer.
       var eventLngLat = [e.lngLat.lng, e.lngLat.lat];
       //console.log(eventLngLat)
       var searchRadius = makeRadius(eventLngLat, 500);
       map.getSource('search-radius').setData(searchRadius);
       var featuresInBuffer = spatialJoin(url, searchRadius); // references url var that contains link to geojson
-      map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer));
+      map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer)); // passed url, 'OSM-water', & 'selected-water' to getSource - no luck.
     });
 
     //makeRadius function goes here!
@@ -124,6 +125,8 @@
 
     //spatialJoin function goes here!
     function spatialJoin(sourceGeoJSON, filterFeature) {
+      // tried adding map.addSource here and did nothing.
+
         // Loop through all the features in the source geojson and return the ones that
         // are inside the filter feature (buffered radius) and are confirmed landing sites
         var joined = sourceGeoJSON.features.filter(function (feature) {
