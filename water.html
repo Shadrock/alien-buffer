@@ -112,7 +112,7 @@
       //console.log(eventLngLat)
       var searchRadius = makeRadius(eventLngLat, 500);
       map.getSource('search-radius').setData(searchRadius);
-      var featuresInBuffer = spatialJoin(url, searchRadius); // references url var that contains link to geojson
+      var featuresInBuffer = spatialJoin(url, searchRadius); // references url var that contains link to geojson. Also tried 'OSM-water' which seemed the same.
       map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer)); // passed url, 'OSM-water', & 'selected-water' to getSource - no luck.
     });
 
