@@ -1,9 +1,3 @@
-# alien-buffer
-Mapbox [tutorial for buffering with Turf](https://labs.mapbox.com/education/proximity-analysis/selecting-within-a-distance/).
-to complete:
-- restructure repo: tutorial points to Data
-- Add content from `metadata.md` in camp-water-analysis folder to the end of the "data readme" so that the readme goes from finding/downloading data through to simplifying it.
-
 # SPHERE mapping with OpenStreetMap, Mapbox, & Turf
 Water distribution in refugee camps is a critical part of good camp management and is mandated by the [SPHERE standards](https://spherestandards.org/), which sets standards for humanitarian action to promote quality and accountability. The SPHERE handbook sets forth standards such as how much water the resident of a camp should have access to and a maximum distance that one should have to travel to access water: less than 500 meters ([see the handbook chapter on water here](https://handbook.spherestandards.org/en/sphere/#ch006_004)). A practical GIS analysis of water accessibility in a refugee camp, then, is ensuring that all portions of the camp are within 500 meters of a water distribution point of some sort.
 
