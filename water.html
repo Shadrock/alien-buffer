@@ -82,12 +82,19 @@
           type: 'geojson',
           data: { "type": "FeatureCollection", "features": [] }
         },
-        type: 'symbol',
-        layout: {
-           'icon-image': 'water-15',
-           'icon-size': 1,
-           'icon-allow-overlap': true
-         }
+        type: 'circle',
+        paint: {
+          'circle-color': 'blue',
+          'circle-radius': 3
+        }
+        // This is broken because this icon doesn't exist in the style, to fix, either add the icon to the sprites for your style in Studio or use map.addImage
+        //Error from console: 'Image "water-15" could not be loaded. Please make sure you have added the image with map.addImage() or a "sprite" property in your style. You can provide missing images by listening for the "styleimagemissing" map event.'
+        // type: 'symbol',
+        // layout: {
+        //    'icon-image': 'water-15', 
+        //    'icon-size': 1,
+        //    'icon-allow-overlap': true
+        //  }
       });
 
       // Draw the search radius on the map
@@ -112,7 +119,7 @@
       //console.log(eventLngLat)
       var searchRadius = makeRadius(eventLngLat, 500);
       map.getSource('search-radius').setData(searchRadius);
-      var featuresInBuffer = spatialJoin(url, searchRadius); // references url var that contains link to geojson. Also tried 'OSM-water' which seemed the same.
+      var featuresInBuffer = spatialJoin('OSM-water', searchRadius); // references url var that contains link to geojson. Also tried 'OSM-water' which seemed the same.
       map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer)); // passed url, 'OSM-water', & 'selected-water' to getSource - no luck.
     });
 
@@ -124,17 +131,22 @@
     }
 
     //spatialJoin function goes here!
-    function spatialJoin(sourceGeoJSON, filterFeature) {
-      // tried adding map.addSource here and did nothing.
+    function spatialJoin(sourceLayer, filterFeature) {
+      // This should work as long as you are querying features within or near the viewport, if you run into issues you can also 
+      // Load the GeoJSON using axios, or `fetch()` and then filter that. Your issue before was your were passing a URL string to `filter`
+      // which requires an array [ ]. That url needs to be loaded
+      // See https://github.com/mapbox/mapbox-gl-js/issues/8333 for more info
+      sourceGeoJSON = map.querySourceFeatures(sourceLayer);
+      // tried adding map.addSource here and did nothing. // This is because `addSource` adds a source to the map, which you have already done above
 
         // Loop through all the features in the source geojson and return the ones that
         // are inside the filter feature (buffered radius) and are confirmed landing sites
-        var joined = sourceGeoJSON.features.filter(function (feature) {
-          return turf.booleanPointInPolygon(feature, filterFeature) && feature.properties.type === 'Free_standing';
-        });
+      var joined = sourceGeoJSON.filter(function (feature) {
+        return turf.booleanPointInPolygon(feature, filterFeature) && feature.properties.type === 'Free_standing';
+      });
 
-        return joined;
-      }
+      return joined;
+    }
 
   </script>
 
