@@ -1,7 +1,6 @@
 # alien-buffer
 Mapbox [tutorial for buffering with Turf](https://labs.mapbox.com/education/proximity-analysis/selecting-within-a-distance/).
 to complete:
-- finish readme (tutorial)
 - restructure repo: tutorial points to Data
 - Add content from `metadata.md` in camp-water-analysis folder to the end of the "data readme" so that the readme goes from finding/downloading data through to simplifying it.
 
@@ -35,7 +34,7 @@ Open a text editor and create a file called index.html. Set up the document by c
 
 <head>
   <meta charset="utf-8" />
-  <title>Alien Map</title>
+  <title>Mapping Water Points</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js'></script>
@@ -70,7 +69,7 @@ Open a text editor and create a file called index.html. Set up the document by c
   <div id="map"></div>
   <div id="instructions">
     <h2>🚰 Instructions</h2>
-    <p>Click anywhere to see water sites within a 500m radius.</p>
+    <p>Click anywhere on the map to see water sites within a 500m radius. Stand alone water sites will be highlighted in red.</p>
   </div>
   <script>
     // Data showing water points - replace the dummy URL with your own.
@@ -141,7 +140,7 @@ There are a few things happening here. We've given this layer a unique name or `
 At this point, your map should look something like this:
 ![screenshot of initialized map](images/Initalized_map_data.png)
 
-Next, add a layer to store the information on confirmed water points (those within the selected radius). This layer’s source data is set to an empty feature collection (`[]`). When a user clicks on a region, any confirmed water points will be added to this layer. For this layer, set the layer `type` to `symbol` and use the Mapbox Maki `water-15` icon to display any confirmed sightings. Maki icons are a handy design element available in Mapbox: [see them all and the documentation here](https://labs.mapbox.com/maki-icons/). Remember this all goes inside of the 'load' event.
+Next, add a layer to store the information on confirmed water points (those within the selected radius). This layer’s source data is set to an empty feature collection (`[]`). When a user clicks on a region, any confirmed water points will be added to this layer. For this layer, set the layer `type` to `circle` and change the color to differentiate it from the blue symbols that are already shown. Remember this all goes inside of the 'load' event.
 
 ```javascript
 // When the map has finished loading, add a new layer that will be empty
@@ -152,19 +151,20 @@ map.addLayer({
     type: 'geojson',
     data: { "type": "FeatureCollection", "features": [] }
   },
-  type: 'symbol',
-  layout: {
-     'icon-image': 'water-15',
-     'icon-size': 1,
-     'icon-allow-overlap': true
+  type: 'circle',
+  paint: {
+    'circle-color': 'red',
+    'circle-radius': 3
      }
 });
 ```
-You may want to use different symbols or play with the design. Find out more about [icon (or "symbol") configurations here](https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/#symbol).
+You may want to use different symbols or play with the design.
+
+Another way to symbolize selected points would be to use an icon instead of a color change. Mapbox Maki icons are a handy design element available in Mapbox: [see them all and the documentation here](https://labs.mapbox.com/maki-icons/). The Mapbox Maki icon `water-15` could be a good one to use. Icons could be loaded here a few ways. You could load the icons to your Mapbox basemap as a custom icon or "sprite", which is a collection of icons ([see documentation here](https://docs.mapbox.com/studio-manual/examples/custom-icon/)). To see an example of how this is used and the code necessary, see the Mapbox [Selecting within a distance tutorial](https://labs.mapbox.com/education/proximity-analysis/selecting-within-a-distance/), which uses `type: 'symbol'` and `layout` instead of the `type: 'circle'` and `paint` we're using in the code below. You can also add an image using `map.addImage()`: [see Mapbox documentation here](https://docs.mapbox.com/mapbox-gl-js/example/add-image/) for that.
 
 Next, add a layer to draw a search radius on the map (still within the load event). This layer’s source data is also set to an empty feature collection but will soon be filled with information about our search radius. Remember this goes inside of the 'load' event.
 ```javascript
-// Draw the alien search radius on the map
+// Draw the search radius on the map
 map.addLayer({
   id: 'search-radius',
   source: {
@@ -179,7 +179,7 @@ map.addLayer({
 });
 
 ```
-Depending on what basemap and data symbology you've chosen, you may want to change the `paint` specifications above for the color, opacity, or other characteristics of the buffer circle. For more information on paint properties you can use see [the Mapbox documentation](https://docs.mapbox.com/help/glossary/layout-paint-property/#paint-properties). 
+Depending on what basemap and data symbology you've chosen, you may want to change the `paint` specifications above for the color, opacity, or other characteristics of the buffer circle. For more information on paint properties you can use see [the Mapbox documentation](https://docs.mapbox.com/help/glossary/layout-paint-property/#paint-properties).
 
 ### Add a "Click Event"
 We need to create search radius around any point on the map that the user clicks. To do this, we need the coordinate information for each click event. This will go under the comment code, ```//Click event goes here!``` Create a click event and store the information about the clicked coordinates in a variable called `eventLngLat`. `Console.log(eventLngLat)` to view the clicked coordinates in your browser. Find out more about different click events in the [Mapbox documentation here](https://docs.mapbox.com/mapbox-gl-js/api/events/). This event should go outside of the load event.
@@ -190,9 +190,7 @@ map.on('click', function(e) {
       console.log(eventLngLat)
     });
 ```
-
 After doing this, comment out `console.log(eventLngLat)` when finished.
-**??**
 
 ### Create a Buffer with Turf
 Now we will use the turf.js library to transform our event coordinates into point features and to create a buffer polygon around each point. This will go under the comment code ``` //makeRadius function goes here!```.
@@ -239,6 +237,8 @@ In this step we are going to create a function that loops through all the featur
 
 ```javascript
 function spatialJoin(sourceGeoJSON, filterFeature) {
+    // Need this line to specify the array since map.getSource in the click event doesn't do this.
+    sourceGeoJSON = map.querySourceFeatures(sourceLayer);
     // Loop through all the features in the source geojson and return the ones that
     // are inside the filter feature (buffered radius) and are confirmed landing sites
     var joined = sourceGeoJSON.features.filter(function (feature) {
@@ -248,21 +248,25 @@ function spatialJoin(sourceGeoJSON, filterFeature) {
     return joined;
   }
 ```
-**`type` is part of key in data. code set for freestanding only**
+There are a few things happening in the code here. the filter code above requires an array, such as `[30, 10]`. And, unfortunately, the `map.getSource` we used in the click event doesn't give our code access to the raw data so we use `sourceGeoJSON = map.querySourceFeatures(sourceLayer);` here to make sure the array is loaded. For more information about querying external data source features see [this Mapbox issue on Github](https://github.com/mapbox/mapbox-gl-js/issues/8333).
+
+The other thing we've done is to specify that the water points we want to highlight are freestanding. We do this by specifying the `type` property in the data.
 
 ### Call the spaptialjoin() Function
-Within the click function, create a new variable called `featuresInBuffer` and assign it the value of `spatialJoin()`. Remember that the function takes two arguements: a GeoJSON and a filter feature. For this exercise, we are using the `searchRadius` as the filter feature.
+Within the click function, create a new variable called `featuresInBuffer` and assign it the value of `spatialJoin()`. Remember that the function takes two arguements: a GeoJSON and a filter feature. For this exercise, we are pointing to our source layer containing the GeoJSON and using the `searchRadius` as the filter feature.
 ```javascript
-var featuresInBuffer = spatialJoin(url, searchRadius);
+var featuresInBuffer = spatialJoin('OSM-water', searchRadius);
 ```
-**points to `url`, could be OSM-water**
-
 ### Set the Identified Water Points Layer
-Set the alien-truth source layer to our newly made featuresInBuffer variable. Below `var = featuresInBuffer`, add the following:
+Set the `selected-water` layer to our newly made `featuresInBuffer` variable. Below `var = featuresInBuffer...`, add the following:
 ```javascript
-map.getSource('alien-truth').setData(turf.featureCollection(featuresInBuffer));
+map.getSource('selected-water').setData(turf.featureCollection(featuresInBuffer));
 ```
-***set for `selected-water`???***
+## Congratulations!
+You're map should look something like this.
+![screenshot of finished map](images/selected_water_points.png)
+
+
 
 # Citations & Further Info
 This tutorial is based on Mapbox's "[Selecting within a distance (one to many)](https://labs.mapbox.com/education/proximity-analysis/selecting-within-a-distance/)" tutorial. I've changed the use-case from finding alien landing sites to using real-world humanitarian data about water availability in refugee camps. I've also changed the code from using in-line GeoJSON to referencing data via a URL.
